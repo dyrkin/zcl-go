@@ -6,13 +6,13 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func Test(t *testing.T) { TestingT(t) }
+func TestFrame(t *testing.T) { TestingT(t) }
 
-type MySuite struct{}
+type FrameSuite struct{}
 
-var _ = Suite(&MySuite{})
+var _ = Suite(&FrameSuite{})
 
-func (s *MySuite) TestEncode(c *C) {
+func (s *FrameSuite) TestEncode(c *C) {
 	frame := &Frame{
 		&FrameControl{1, 1, DirectionClientServer, 1, 0},
 		123,
@@ -34,7 +34,7 @@ func (s *MySuite) TestEncode(c *C) {
 	c.Assert(res, DeepEquals, []uint8{0x11, 0x1, 0x5, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9})
 }
 
-func (s *MySuite) TestDecode(c *C) {
+func (s *FrameSuite) TestDecode(c *C) {
 	frame := &Frame{
 		&FrameControl{1, 1, DirectionClientServer, 1, 0},
 		123,
