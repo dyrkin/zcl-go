@@ -39,7 +39,7 @@ type ReadAttributeStatus struct {
 	Attribute   *Attribute `cond:"uint:Status==0"`
 }
 
-type ReadAttributesResponseCommand struct {
+type ReadAttributesResponse struct {
 	ReadAttributeStatuses []*ReadAttributeStatus
 }
 
@@ -57,7 +57,7 @@ type WriteAttributeStatus struct {
 	AttributeID uint16
 }
 
-type WriteAttributesResponseCommand struct {
+type WriteAttributesResponse struct {
 	WriteAttributeStatuses []*WriteAttributeStatus
 }
 
@@ -81,7 +81,7 @@ type AttributeStatusRecord struct {
 	AttributeID uint16
 }
 
-type ConfigureReportingResponseCommand struct {
+type ConfigureReportingResponse struct {
 	AttributeStatusRecords []*AttributeStatusRecord
 }
 
@@ -105,7 +105,7 @@ type AttributeReportingConfigurationResponseRecord struct {
 	TimeoutPeriod            uint16      `cond:"uint:Direction==1;uint:Status==0"`
 }
 
-type ReadReportingConfigurationResponseCommand struct {
+type ReadReportingConfigurationResponse struct {
 	AttributeReportingConfigurationResponseRecords []*AttributeReportingConfigurationResponseRecord
 }
 type AttributeReport struct {
@@ -117,11 +117,102 @@ type ReportAttributesCommand struct {
 	AttributeReports []*AttributeReport
 }
 
+type DefaultResponseCommand struct {
+	CommandID uint8
+	Status    ZclStatus
+}
+
+type DiscoverAttributesCommand struct {
+	StartAttributeID            uint16
+	MaximumAttributeIdentifiers uint8
+}
+
+type AttributeInformation struct {
+	AttributeID       uint16
+	AttributeDataType ZclDataType
+}
+
+type DiscoverAttributesResponse struct {
+	DiscoveryComplete     uint8
+	AttributeInformations []*AttributeInformation
+}
+
+type AttributeSelector struct {
+	AttributeID uint16
+	Selector    []uint16 `size:"1"`
+}
+
+type ReadAttributesStructuredCommand struct {
+	AttributeSelectors []*AttributeSelector
+}
+
+type WriteAttributeStructuredRecord struct {
+	AttributeID uint16
+	Selector    []uint16 `size:"1"`
+	Attribute   *Attribute
+}
+
+type WriteAttributesStructuredCommand struct {
+	WriteAttributeStructuredRecords []*WriteAttributeStructuredRecord
+}
+
+type WriteAttributeStatusRecord struct {
+	Status      ZclStatus
+	AttributeID uint16
+	Selector    []uint16 `size:"1"`
+}
+
+type WriteAttributesStructuredResponse struct {
+	WriteAttributeStatusRecords []*WriteAttributeStatusRecord
+}
+
+type DiscoverCommandsReceivedCommand struct {
+	StartCommandID            uint8
+	MaximumCommandIdentifiers uint8
+}
+
+type DiscoverCommandsReceivedResponse struct {
+	DiscoveryComplete  uint8
+	CommandIdentifiers []uint8
+}
+
+type DiscoverCommandsGeneratedCommand struct {
+	StartCommandID            uint8
+	MaximumCommandIdentifiers uint8
+}
+
+type DiscoverCommandsGeneratedResponse struct {
+	DiscoveryComplete  uint8
+	CommandIdentifiers []uint8
+}
+
+type DiscoverAttributesExtendedCommand struct {
+	StartAttributeID            uint16
+	MaximumAttributeIdentifiers uint8
+}
+
+type AttributeAccessControl struct {
+	Readable   uint8 `bits:"0b00000001" bitmask:"start"`
+	Writeable  uint8 `bits:"0b00000010"`
+	Reportable uint8 `bits:"0b00000100" bitmask:"end"`
+}
+
+type ExtendedAttributeInformation struct {
+	AttributeID            uint16
+	AttributeDataType      ZclDataType
+	AttributeAccessControl *AttributeAccessControl
+}
+
+type DiscoverAttributesExtendedResponse struct {
+	DiscoveryComplete             uint8
+	ExtendedAttributeInformations []*ExtendedAttributeInformation
+}
+
 func ReadAttributesCommandFrame(command *ReadAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributes, command, direction, disableDefaultResponse)
 }
 
-func ReadAttributesResponseCommandFrame(command *ReadAttributesResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func ReadAttributesResponseFrame(command *ReadAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributesResponse, command, direction, disableDefaultResponse)
 }
 
@@ -133,7 +224,7 @@ func WriteAttributesUndividedCommandFrame(command *WriteAttributesCommand, direc
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesUndivided, command, direction, disableDefaultResponse)
 }
 
-func WriteAttributesResponseCommandFrame(command *WriteAttributesResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func WriteAttributesResponseFrame(command *WriteAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesResponse, command, direction, disableDefaultResponse)
 }
 
@@ -145,7 +236,7 @@ func ConfigureReportingCommandFrame(command *ConfigureReportingCommand, directio
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReporting, command, direction, disableDefaultResponse)
 }
 
-func ConfigureReportingResponseCommandFrame(command *ConfigureReportingResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func ConfigureReportingResponseFrame(command *ConfigureReportingResponse, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReportingResponse, command, direction, disableDefaultResponse)
 }
 
@@ -153,12 +244,60 @@ func ReadReportingConfigurationCommandFrame(command *ReadReportingConfigurationC
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfiguration, command, direction, disableDefaultResponse)
 }
 
-func ReadReportingConfigurationResponseCommandFrame(command *ReadReportingConfigurationResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func ReadReportingConfigurationResponseFrame(command *ReadReportingConfigurationResponse, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfigurationResponse, command, direction, disableDefaultResponse)
 }
 
 func ReportAttributesCommandFrame(command *ReportAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReportAttributes, command, direction, disableDefaultResponse)
+}
+
+func DefaultResponseCommandFrame(command *DefaultResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDefaultResponse, command, direction, disableDefaultResponse)
+}
+
+func DiscoverAttributesCommandFrame(command *DiscoverAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributes, command, direction, disableDefaultResponse)
+}
+
+func DiscoverAttributesResponseFrame(command *DiscoverAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesResponse, command, direction, disableDefaultResponse)
+}
+
+func ReadAttributesStructuredCommandFrame(command *ReadAttributesStructuredCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributesStructured, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesStructuredCommandFrame(command *WriteAttributesStructuredCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesStructured, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesStructuredResponseFrame(command *WriteAttributesStructuredResponse, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesStructuredResponse, command, direction, disableDefaultResponse)
+}
+
+func DiscoverCommandsReceivedCommandFrame(command *DiscoverCommandsReceivedCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsReceived, command, direction, disableDefaultResponse)
+}
+
+func DiscoverCommandsReceivedResponseFrame(command *DiscoverCommandsReceivedResponse, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsReceivedResponse, command, direction, disableDefaultResponse)
+}
+
+func DiscoverCommandsGeneratedCommandFrame(command *DiscoverCommandsGeneratedCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsGenerated, command, direction, disableDefaultResponse)
+}
+
+func DiscoverCommandsGeneratedResponseFrame(command *DiscoverCommandsGeneratedResponse, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsGenerated, command, direction, disableDefaultResponse)
+}
+
+func DiscoverAttributesExtendedCommandFrame(command *DiscoverAttributesExtendedCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesExtended, command, direction, disableDefaultResponse)
+}
+
+func DiscoverAttributesExtendedResponseFrame(command *DiscoverAttributesExtendedResponse, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesExtendedResponse, command, direction, disableDefaultResponse)
 }
 
 func (a *Attribute) Serialize(w io.Writer) {
