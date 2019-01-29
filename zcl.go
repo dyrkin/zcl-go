@@ -302,323 +302,340 @@ func DiscoverAttributesExtendedResponseFrame(command *DiscoverAttributesExtended
 
 func (a *Attribute) Serialize(w io.Writer) {
 	c := composer.NewWithW(w)
-	c.Uint8(uint8(a.DataType))
+	writeAttribute(c, a.DataType, a.Value)
+	c.Flush()
+}
 
-	switch a.DataType {
+func writeAttribute(c *composer.Composer, dataType ZclDataType, value interface{}) {
+	c.Uint8(uint8(dataType))
+	switch dataType {
 	case ZclDataTypeNoData:
 	case ZclDataTypeData8:
-		b := a.Value.([1]byte)
+		b := value.([1]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData16:
-		b := a.Value.([2]byte)
+		b := value.([2]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData24:
-		b := a.Value.([3]byte)
+		b := value.([3]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData32:
-		b := a.Value.([4]byte)
+		b := value.([4]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData40:
-		b := a.Value.([5]byte)
+		b := value.([5]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData48:
-		b := a.Value.([6]byte)
+		b := value.([6]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData56:
-		b := a.Value.([7]byte)
+		b := value.([7]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeData64:
-		b := a.Value.([8]byte)
+		b := value.([8]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeBoolean:
-		b := a.Value.(bool)
+		b := value.(bool)
 		if b {
 			c.Byte(1)
 		} else {
 			c.Byte(0)
 		}
 	case ZclDataTypeBitmap8:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 1)
 	case ZclDataTypeBitmap16:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 2)
 	case ZclDataTypeBitmap24:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 3)
 	case ZclDataTypeBitmap32:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 4)
 	case ZclDataTypeBitmap40:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 5)
 	case ZclDataTypeBitmap48:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 6)
 	case ZclDataTypeBitmap56:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 7)
 	case ZclDataTypeBitmap64:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 8)
 	case ZclDataTypeUint8:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 1)
 	case ZclDataTypeUint16:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 2)
 	case ZclDataTypeUint24:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 3)
 	case ZclDataTypeUint32:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 4)
 	case ZclDataTypeUint40:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 5)
 	case ZclDataTypeUint48:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 6)
 	case ZclDataTypeUint56:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 7)
 	case ZclDataTypeUint64:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 8)
 	case ZclDataTypeInt8:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 1)
 	case ZclDataTypeInt16:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 2)
 	case ZclDataTypeInt24:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 3)
 	case ZclDataTypeInt32:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 4)
 	case ZclDataTypeInt40:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 5)
 	case ZclDataTypeInt48:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 6)
 	case ZclDataTypeInt56:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 7)
 	case ZclDataTypeInt64:
-		b := a.Value.(int64)
+		b := value.(int64)
 		c.Int(binary.LittleEndian, b, 8)
 	case ZclDataTypeEnum8:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 1)
 	case ZclDataTypeEnum16:
-		b := a.Value.(uint64)
+		b := value.(uint64)
 		c.Uint(binary.LittleEndian, b, 2)
 	case ZclDataTypeSemiPrec:
 	case ZclDataTypeSinglePrec:
 	case ZclDataTypeDoublePrec:
 	case ZclDataTypeOctetStr:
-		b := a.Value.(string)
+		b := value.(string)
 		c.Uint8(uint8(len(b)))
 		c.String(b)
 	case ZclDataTypeCharStr:
-		b := a.Value.(string)
+		b := value.(string)
 		c.Uint8(uint8(len(b)))
 		c.String(b)
 	case ZclDataTypeLongOctetStr:
-		b := a.Value.(string)
+		b := value.(string)
 		c.Uint16le(uint16(len(b)))
 		c.String(b)
 	case ZclDataTypeLongCharStr:
-		b := a.Value.(string)
+		b := value.(string)
 		c.Uint16le(uint16(len(b)))
 		c.String(b)
-	case ZclDataTypeArray:
+	case ZclDataTypeArray, ZclDataTypeSet, ZclDataTypeBag:
+		attributes := value.([]*Attribute)
+		c.Uint16le(uint16(len(attributes)))
+		for _, attribute := range attributes {
+			writeAttribute(c, attribute.DataType, attribute.Value)
+		}
 	case ZclDataTypeStruct:
-	case ZclDataTypeSet:
-	case ZclDataTypeBag:
 	case ZclDataTypeTod:
-		b := a.Value.(*TimeOfDay)
+		b := value.(*TimeOfDay)
 		c.Uint8(b.Hours)
 		c.Uint8(b.Minutes)
 		c.Uint8(b.Seconds)
 		c.Uint8(b.Hundredths)
 	case ZclDataTypeDate:
-		b := a.Value.(*Date)
+		b := value.(*Date)
 		c.Uint8(b.Year)
 		c.Uint8(b.Month)
 		c.Uint8(b.DayOfMonth)
 		c.Uint8(b.DayOfWeek)
 	case ZclDataTypeUtc:
-		b := a.Value.(uint32)
+		b := value.(uint32)
 		c.Uint32le(b)
 	case ZclDataTypeClusterId:
-		b := a.Value.(uint16)
+		b := value.(uint16)
 		c.Uint16le(b)
 	case ZclDataTypeAttrId:
-		b := a.Value.(uint16)
+		b := value.(uint16)
 		c.Uint16le(b)
 	case ZclDataTypeBacOid:
-		b := a.Value.(uint32)
+		b := value.(uint32)
 		c.Uint32le(b)
 	case ZclDataTypeIeeeAddr:
-		b := a.Value.(string)
+		b := value.(string)
 		v, _ := strconv.ParseUint(b[2:], 16, 64)
 		c.Uint64le(v)
 	case ZclDataType_128BitSecKey:
-		b := a.Value.([16]byte)
+		b := value.([16]byte)
 		c.Bytes(b[:])
 	case ZclDataTypeUnknown:
 
 	}
-	c.Flush()
 }
 
 func (a *Attribute) Deserialize(r io.Reader) {
 	c := composer.NewWithR(r)
-	dataType, _ := c.ReadByte()
-	a.DataType = ZclDataType(dataType)
+	a.DataType, a.Value = readAttribute(c)
+}
 
-	switch a.DataType {
+func readAttribute(c *composer.Composer) (dataType ZclDataType, value interface{}) {
+	dt, _ := c.ReadByte()
+	dataType = ZclDataType(dt)
+
+	switch dataType {
 	case ZclDataTypeNoData:
-		a.Value = nil
+		value = nil
 	case ZclDataTypeData8:
 		var buf [1]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData16:
 		var buf [2]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData24:
 		var buf [3]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData32:
 		var buf [4]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData40:
 		var buf [5]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData48:
 		var buf [6]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData56:
 		var buf [7]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeData64:
 		var buf [8]byte
 		c.ReadBuf(buf[:])
-		a.Value = buf
+		value = buf
 	case ZclDataTypeBoolean:
 		b, _ := c.ReadByte()
-		a.Value = b > 0
+		value = b > 0
 	case ZclDataTypeBitmap8:
-		a.Value = c.ReadUint(binary.LittleEndian, 1)
+		value = c.ReadUint(binary.LittleEndian, 1)
 	case ZclDataTypeBitmap16:
-		a.Value = c.ReadUint(binary.LittleEndian, 2)
+		value = c.ReadUint(binary.LittleEndian, 2)
 	case ZclDataTypeBitmap24:
-		a.Value = c.ReadUint(binary.LittleEndian, 3)
+		value = c.ReadUint(binary.LittleEndian, 3)
 	case ZclDataTypeBitmap32:
-		a.Value = c.ReadUint(binary.LittleEndian, 4)
+		value = c.ReadUint(binary.LittleEndian, 4)
 	case ZclDataTypeBitmap40:
-		a.Value = c.ReadUint(binary.LittleEndian, 5)
+		value = c.ReadUint(binary.LittleEndian, 5)
 	case ZclDataTypeBitmap48:
-		a.Value = c.ReadUint(binary.LittleEndian, 6)
+		value = c.ReadUint(binary.LittleEndian, 6)
 	case ZclDataTypeBitmap56:
-		a.Value = c.ReadUint(binary.LittleEndian, 7)
+		value = c.ReadUint(binary.LittleEndian, 7)
 	case ZclDataTypeBitmap64:
-		a.Value = c.ReadUint(binary.LittleEndian, 8)
+		value = c.ReadUint(binary.LittleEndian, 8)
 	case ZclDataTypeUint8:
-		a.Value = c.ReadUint(binary.LittleEndian, 1)
+		value = c.ReadUint(binary.LittleEndian, 1)
 	case ZclDataTypeUint16:
-		a.Value = c.ReadUint(binary.LittleEndian, 2)
+		value = c.ReadUint(binary.LittleEndian, 2)
 	case ZclDataTypeUint24:
-		a.Value = c.ReadUint(binary.LittleEndian, 3)
+		value = c.ReadUint(binary.LittleEndian, 3)
 	case ZclDataTypeUint32:
-		a.Value = c.ReadUint(binary.LittleEndian, 4)
+		value = c.ReadUint(binary.LittleEndian, 4)
 	case ZclDataTypeUint40:
-		a.Value = c.ReadUint(binary.LittleEndian, 5)
+		value = c.ReadUint(binary.LittleEndian, 5)
 	case ZclDataTypeUint48:
-		a.Value = c.ReadUint(binary.LittleEndian, 6)
+		value = c.ReadUint(binary.LittleEndian, 6)
 	case ZclDataTypeUint56:
-		a.Value = c.ReadUint(binary.LittleEndian, 7)
+		value = c.ReadUint(binary.LittleEndian, 7)
 	case ZclDataTypeUint64:
-		a.Value = c.ReadUint(binary.LittleEndian, 8)
+		value = c.ReadUint(binary.LittleEndian, 8)
 	case ZclDataTypeInt8:
-		a.Value = c.ReadInt(binary.LittleEndian, 1)
+		value = c.ReadInt(binary.LittleEndian, 1)
 	case ZclDataTypeInt16:
-		a.Value = c.ReadInt(binary.LittleEndian, 2)
+		value = c.ReadInt(binary.LittleEndian, 2)
 	case ZclDataTypeInt24:
-		a.Value = c.ReadInt(binary.LittleEndian, 3)
+		value = c.ReadInt(binary.LittleEndian, 3)
 	case ZclDataTypeInt32:
-		a.Value = c.ReadInt(binary.LittleEndian, 4)
+		value = c.ReadInt(binary.LittleEndian, 4)
 	case ZclDataTypeInt40:
-		a.Value = c.ReadInt(binary.LittleEndian, 5)
+		value = c.ReadInt(binary.LittleEndian, 5)
 	case ZclDataTypeInt48:
-		a.Value = c.ReadInt(binary.LittleEndian, 6)
+		value = c.ReadInt(binary.LittleEndian, 6)
 	case ZclDataTypeInt56:
-		a.Value = c.ReadInt(binary.LittleEndian, 7)
+		value = c.ReadInt(binary.LittleEndian, 7)
 	case ZclDataTypeInt64:
-		a.Value = c.ReadInt(binary.LittleEndian, 8)
+		value = c.ReadInt(binary.LittleEndian, 8)
 	case ZclDataTypeEnum8:
-		a.Value = c.ReadUint(binary.LittleEndian, 1)
+		value = c.ReadUint(binary.LittleEndian, 1)
 	case ZclDataTypeEnum16:
-		a.Value = c.ReadUint(binary.LittleEndian, 2)
+		value = c.ReadUint(binary.LittleEndian, 2)
 	case ZclDataTypeSemiPrec:
 	case ZclDataTypeSinglePrec:
 	case ZclDataTypeDoublePrec:
 	case ZclDataTypeOctetStr:
 		len, _ := c.ReadByte()
-		a.Value, _ = c.ReadString(int(len))
+		value, _ = c.ReadString(int(len))
 	case ZclDataTypeCharStr:
 		len, _ := c.ReadByte()
-		a.Value, _ = c.ReadString(int(len))
+		value, _ = c.ReadString(int(len))
 	case ZclDataTypeLongOctetStr:
 		len, _ := c.ReadUint16le()
-		a.Value, _ = c.ReadString(int(len))
+		value, _ = c.ReadString(int(len))
 	case ZclDataTypeLongCharStr:
 		len, _ := c.ReadUint16le()
-		a.Value, _ = c.ReadString(int(len))
-	case ZclDataTypeArray:
+		value, _ = c.ReadString(int(len))
+	case ZclDataTypeArray, ZclDataTypeSet, ZclDataTypeBag:
+		len, _ := c.ReadUint16le()
+		arr := make([]*Attribute, len)
+		for i := 0; i < int(len); i++ {
+			attribute := &Attribute{}
+			attribute.DataType, attribute.Value = readAttribute(c)
+			arr[i] = attribute
+		}
+		value = arr
 	case ZclDataTypeStruct:
-	case ZclDataTypeSet:
-	case ZclDataTypeBag:
 	case ZclDataTypeTod:
 		hours, _ := c.ReadUint8()
 		minutes, _ := c.ReadUint8()
 		seconds, _ := c.ReadUint8()
 		hundredths, _ := c.ReadUint8()
-		a.Value = &TimeOfDay{hours, minutes, seconds, hundredths}
+		value = &TimeOfDay{hours, minutes, seconds, hundredths}
 	case ZclDataTypeDate:
 		year, _ := c.ReadUint8()
 		month, _ := c.ReadUint8()
 		dayOfMonth, _ := c.ReadUint8()
 		dayOfWeek, _ := c.ReadUint8()
-		a.Value = &Date{year, month, dayOfMonth, dayOfWeek}
+		value = &Date{year, month, dayOfMonth, dayOfWeek}
 	case ZclDataTypeUtc:
-		a.Value, _ = c.ReadUint32le()
+		value, _ = c.ReadUint32le()
 	case ZclDataTypeClusterId:
-		a.Value, _ = c.ReadUint16le()
+		value, _ = c.ReadUint16le()
 	case ZclDataTypeAttrId:
-		a.Value, _ = c.ReadUint16le()
+		value, _ = c.ReadUint16le()
 	case ZclDataTypeBacOid:
-		a.Value, _ = c.ReadUint32le()
+		value, _ = c.ReadUint32le()
 	case ZclDataTypeIeeeAddr:
 		v, _ := c.ReadUint64le()
-		a.Value, _ = util.UintToHexString(v, 8)
+		value, _ = util.UintToHexString(v, 8)
 	case ZclDataType_128BitSecKey:
 		var key [16]byte
 		_ = c.ReadBuf(key[:])
-		a.Value = key
+		value = key
 	case ZclDataTypeUnknown:
 
 	}
+	return
 }
 
 func ToFoundationNonManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, direction Direction, disableDefaultResponse bool) *Frame {
