@@ -5,11 +5,12 @@ import (
 	"io"
 	"strconv"
 
+	"github.com/dyrkin/bin"
 	"github.com/dyrkin/bin/util"
 	"github.com/dyrkin/composer"
 )
 
-type ReadAttributes struct {
+type ReadAttributesCommand struct {
 	AttributeIDs []uint16
 }
 
@@ -38,8 +39,126 @@ type ReadAttributeStatus struct {
 	Attribute   *Attribute `cond:"uint:Status==0"`
 }
 
-type ReadAttributesResponse struct {
+type ReadAttributesResponseCommand struct {
 	ReadAttributeStatuses []*ReadAttributeStatus
+}
+
+type WriteAttributeRecord struct {
+	AttributeID uint16
+	Attribute   *Attribute
+}
+
+type WriteAttributesCommand struct {
+	WriteAttributeRecords []*WriteAttributeRecord
+}
+
+type WriteAttributeStatus struct {
+	Status      ZclStatus
+	AttributeID uint16
+}
+
+type WriteAttributesResponseCommand struct {
+	WriteAttributeStatuses []*WriteAttributeStatus
+}
+
+type AttributeReportingConfigurationRecord struct {
+	Direction                ReportDirection
+	AttributeID              uint16
+	AttributeDataType        ZclDataType `cond:"uint:Direction==0"`
+	MinimumReportingInterval uint16      `cond:"uint:Direction==0"`
+	MaximumReportingInterval uint16      `cond:"uint:Direction==0"`
+	ReportableChange         *Attribute  `cond:"uint:Direction==0"`
+	TimeoutPeriod            uint16      `cond:"uint:Direction==1"`
+}
+
+type ConfigureReportingCommand struct {
+	AttributeReportingConfigurationRecords []*AttributeReportingConfigurationRecord
+}
+
+type AttributeStatusRecord struct {
+	Status      ZclStatus
+	Direction   ReportDirection
+	AttributeID uint16
+}
+
+type ConfigureReportingResponseCommand struct {
+	AttributeStatusRecords []*AttributeStatusRecord
+}
+
+type AttributeRecord struct {
+	Direction   ReportDirection
+	AttributeID uint16
+}
+
+type ReadReportingConfigurationCommand struct {
+	AttributeRecords []*AttributeRecord
+}
+
+type AttributeReportingConfigurationResponseRecord struct {
+	Status                   ZclStatus
+	Direction                ReportDirection
+	AttributeID              uint16
+	AttributeDataType        ZclDataType `cond:"uint:Direction==0;uint:Status==0"`
+	MinimumReportingInterval uint16      `cond:"uint:Direction==0;uint:Status==0"`
+	MaximumReportingInterval uint16      `cond:"uint:Direction==0;uint:Status==0"`
+	ReportableChange         *Attribute  `cond:"uint:Direction==0;uint:Status==0"`
+	TimeoutPeriod            uint16      `cond:"uint:Direction==1;uint:Status==0"`
+}
+
+type ReadReportingConfigurationResponseCommand struct {
+	AttributeReportingConfigurationResponseRecords []*AttributeReportingConfigurationResponseRecord
+}
+type AttributeReport struct {
+	AttributeID uint16
+	Attribute   *Attribute
+}
+
+type ReportAttributesCommand struct {
+	AttributeReports []*AttributeReport
+}
+
+func ReadAttributesCommandFrame(command *ReadAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributes, command, direction, disableDefaultResponse)
+}
+
+func ReadAttributesResponseCommandFrame(command *ReadAttributesResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributesResponse, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributes, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesUndividedCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesUndivided, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesResponseCommandFrame(command *WriteAttributesResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesResponse, command, direction, disableDefaultResponse)
+}
+
+func WriteAttributesNoResponseCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesNoResponse, command, direction, disableDefaultResponse)
+}
+
+func ConfigureReportingCommandFrame(command *ConfigureReportingCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReporting, command, direction, disableDefaultResponse)
+}
+
+func ConfigureReportingResponseCommandFrame(command *ConfigureReportingResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReportingResponse, command, direction, disableDefaultResponse)
+}
+
+func ReadReportingConfigurationCommandFrame(command *ReadReportingConfigurationCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfiguration, command, direction, disableDefaultResponse)
+}
+
+func ReadReportingConfigurationResponseCommandFrame(command *ReadReportingConfigurationResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfigurationResponse, command, direction, disableDefaultResponse)
+}
+
+func ReportAttributesCommandFrame(command *ReportAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReportAttributes, command, direction, disableDefaultResponse)
 }
 
 func (a *Attribute) Serialize(w io.Writer) {
@@ -363,14 +482,30 @@ func (a *Attribute) Deserialize(r io.Reader) {
 	}
 }
 
-// func (v *ReadAttributes) ToFrame() *Frame {
-// 	c := composer.New()
-// 	frameControl := &FrameControl{FrameTypeGlobal, 0x0, v.Direction, v.DisableDefaultResponse, 0}
-// 	payload :=
-// 	return &Frame{frameControl, 0, 1, ZclCommandReadAttributes, []uint8{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}
-// }
+func ToFoundationNonManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFoundationManufacturerSpecificFrame(commandIdentifier, command, false, 0, direction,
+		disableDefaultResponse)
+}
 
-// func (v *ReadAttributes) FromFrame(frame *Frame) *ReadAttributes {
-// 	frameControl := &FrameControl{FrameTypeGlobal, 0x0, v.Direction, v.DisableDefaultResponse, 0}
-// 	return &Frame{frameControl, 0, 1, ZclCommandReadAttributes, []uint8{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}
-// }
+func ToFoundationManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, manufacturerSpecific bool, manufacturerCode uint16,
+	direction Direction, disableDefaultResponse bool) *Frame {
+	return ToFrame(commandIdentifier, command, FrameTypeGlobal, manufacturerSpecific, manufacturerCode, direction,
+		disableDefaultResponse)
+}
+
+func ToFrame(commandIdentifier ZclCommand, command interface{}, frameType FrameType, manufacturerSpecific bool, manufacturerCode uint16,
+	direction Direction, disableDefaultResponse bool) *Frame {
+	return &Frame{
+		&FrameControl{frameType, flag(manufacturerSpecific), direction, flag(disableDefaultResponse), 0},
+		manufacturerCode, 1,
+		commandIdentifier,
+		bin.Encode(command),
+	}
+}
+
+func flag(boolean bool) uint8 {
+	if boolean {
+		return 1
+	}
+	return 0
+}

@@ -257,3 +257,24 @@ const (
 	ZclCommandDiscoverAttributesExtended         ZclCommand = 0x15
 	ZclCommandDiscoverAttributesExtendedResponse ZclCommand = 0x16
 )
+
+type ReportDirection uint8
+
+const (
+	ReportDirectionAttributeReported ReportDirection = 0x00
+	ReportDirectionAttributeReceived ReportDirection = 0x01
+)
+
+type Direction uint8
+
+const (
+	DirectionClientServer Direction = 0x00
+	DirectionServerClient Direction = 0x01
+)
+
+type FrameType uint8
+
+const (
+	FrameTypeGlobal FrameType = 0x00
+	FrameTypeLocal  FrameType = 0x01
+)
