@@ -52,6 +52,14 @@ type WriteAttributesCommand struct {
 	WriteAttributeRecords []*WriteAttributeRecord
 }
 
+type WriteAttributesUndividedCommand struct {
+	WriteAttributeRecords []*WriteAttributeRecord
+}
+
+type WriteAttributesNoResponseCommand struct {
+	WriteAttributeRecords []*WriteAttributeRecord
+}
+
 type WriteAttributeStatus struct {
 	Status      ZclStatus
 	AttributeID uint16
@@ -220,7 +228,7 @@ func WriteAttributesCommandFrame(command *WriteAttributesCommand, direction Dire
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributes, command, direction, disableDefaultResponse)
 }
 
-func WriteAttributesUndividedCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func WriteAttributesUndividedCommandFrame(command *WriteAttributesUndividedCommand, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesUndivided, command, direction, disableDefaultResponse)
 }
 
@@ -228,7 +236,7 @@ func WriteAttributesResponseFrame(command *WriteAttributesResponse, direction Di
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesResponse, command, direction, disableDefaultResponse)
 }
 
-func WriteAttributesNoResponseCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
+func WriteAttributesNoResponseCommandFrame(command *WriteAttributesNoResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesNoResponse, command, direction, disableDefaultResponse)
 }
 
@@ -657,6 +665,64 @@ func ToFrame(commandIdentifier ZclCommand, command interface{}, frameType FrameT
 		commandIdentifier,
 		bin.Encode(command),
 	}
+}
+
+func FromFrame(frame *Frame) (decoded interface{}, ok bool) {
+	ok = true
+	switch frame.CommandIdentifier {
+	case ZclCommandReadAttributes:
+		decoded = &ReadAttributesCommand{}
+	case ZclCommandReadAttributesResponse:
+		decoded = &ReadAttributesResponse{}
+	case ZclCommandWriteAttributes:
+		decoded = &WriteAttributesCommand{}
+	case ZclCommandWriteAttributesUndivided:
+		decoded = &WriteAttributesUndividedCommand{}
+	case ZclCommandWriteAttributesResponse:
+		decoded = &WriteAttributesResponse{}
+	case ZclCommandWriteAttributesNoResponse:
+		decoded = &WriteAttributesNoResponseCommand{}
+	case ZclCommandConfigureReporting:
+		decoded = &ConfigureReportingCommand{}
+	case ZclCommandConfigureReportingResponse:
+		decoded = &ConfigureReportingResponse{}
+	case ZclCommandReadReportingConfiguration:
+		decoded = &ReadReportingConfigurationCommand{}
+	case ZclCommandReadReportingConfigurationResponse:
+		decoded = &ReadReportingConfigurationResponse{}
+	case ZclCommandReportAttributes:
+		decoded = &ReportAttributesCommand{}
+	case ZclCommandDefaultResponse:
+		decoded = &DefaultResponseCommand{}
+	case ZclCommandDiscoverAttributes:
+		decoded = &DiscoverAttributesCommand{}
+	case ZclCommandDiscoverAttributesResponse:
+		decoded = &DiscoverAttributesResponse{}
+	case ZclCommandReadAttributesStructured:
+		decoded = &ReadAttributesStructuredCommand{}
+	case ZclCommandWriteAttributesStructured:
+		decoded = &WriteAttributesStructuredCommand{}
+	case ZclCommandWriteAttributesStructuredResponse:
+		decoded = &WriteAttributesStructuredResponse{}
+	case ZclCommandDiscoverCommandsReceived:
+		decoded = &DiscoverCommandsReceivedCommand{}
+	case ZclCommandDiscoverCommandsReceivedResponse:
+		decoded = &DiscoverCommandsReceivedResponse{}
+	case ZclCommandDiscoverCommandsGenerated:
+		decoded = &DiscoverCommandsGeneratedCommand{}
+	case ZclCommandDiscoverCommandsGeneratedResponse:
+		decoded = &DiscoverCommandsGeneratedResponse{}
+	case ZclCommandDiscoverAttributesExtended:
+		decoded = &DiscoverAttributesExtendedCommand{}
+	case ZclCommandDiscoverAttributesExtendedResponse:
+		decoded = &DiscoverAttributesExtendedResponse{}
+	default:
+		ok = false
+	}
+	if ok {
+		bin.Decode(frame.Payload, decoded)
+	}
+	return
 }
 
 func flag(boolean bool) uint8 {
