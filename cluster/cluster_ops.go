@@ -27,6 +27,17 @@ func (c *Zcl) LocalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, a
 	return
 }
 
+func (c *Zcl) GlobalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, args ...interface{}) (f *frame.Frame, err error) {
+	if _, cluster, err := clusterQuery(c.clusters); err == nil {
+		if commandId, commandDescriptor, err := commandQuery(cluster); err == nil {
+			command := commandDescriptor.Command
+			preparedCommand := prepareCommand(command, args...)
+			return createFrame(frame.FrameTypeGlobal, commandId, preparedCommand), nil
+		}
+	}
+	return
+}
+
 func (c *Zcl) FromFrame(clusterId ClusterId, f *frame.Frame) (interface{}, error) {
 	var cd *commandDescriptor
 	var ok bool
