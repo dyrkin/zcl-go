@@ -8,6 +8,7 @@ import (
 	"github.com/dyrkin/bin"
 	"github.com/dyrkin/bin/util"
 	"github.com/dyrkin/composer"
+	. "github.com/dyrkin/zcl-go/frame"
 )
 
 type ReadAttributesCommand struct {
@@ -647,17 +648,17 @@ func readAttribute(c *composer.Composer) (dataType ZclDataType, value interface{
 }
 
 func ToFoundationNonManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationManufacturerSpecificFrame(commandIdentifier, command, false, 0, direction,
+	return ToFoundationManufacturerSpecificFrame(uint8(commandIdentifier), command, false, 0, direction,
 		disableDefaultResponse)
 }
 
-func ToFoundationManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, manufacturerSpecific bool, manufacturerCode uint16,
+func ToFoundationManufacturerSpecificFrame(commandIdentifier uint8, command interface{}, manufacturerSpecific bool, manufacturerCode uint16,
 	direction Direction, disableDefaultResponse bool) *Frame {
 	return ToFrame(commandIdentifier, command, FrameTypeGlobal, manufacturerSpecific, manufacturerCode, direction,
 		disableDefaultResponse)
 }
 
-func ToFrame(commandIdentifier ZclCommand, command interface{}, frameType FrameType, manufacturerSpecific bool, manufacturerCode uint16,
+func ToFrame(commandIdentifier uint8, command interface{}, frameType FrameType, manufacturerSpecific bool, manufacturerCode uint16,
 	direction Direction, disableDefaultResponse bool) *Frame {
 	return &Frame{
 		&FrameControl{frameType, flag(manufacturerSpecific), direction, flag(disableDefaultResponse), 0},
@@ -669,7 +670,7 @@ func ToFrame(commandIdentifier ZclCommand, command interface{}, frameType FrameT
 
 func FromFrame(frame *Frame) (decoded interface{}, ok bool) {
 	ok = true
-	switch frame.CommandIdentifier {
+	switch ZclCommand(frame.CommandIdentifier) {
 	case ZclCommandReadAttributes:
 		decoded = &ReadAttributesCommand{}
 	case ZclCommandReadAttributesResponse:
