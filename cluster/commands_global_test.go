@@ -1,4 +1,4 @@
-package zcl
+package cluster
 
 import (
 	"testing"
@@ -7,13 +7,13 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func TestZcl(t *testing.T) { TestingT(t) }
+func TestCommandsGlobal(t *testing.T) { TestingT(t) }
 
-type ZclSuite struct{}
+type CommandsGlobalSuite struct{}
 
-var _ = Suite(&ZclSuite{})
+var _ = Suite(&CommandsGlobalSuite{})
 
-func (s *ZclSuite) TestDecodeReadAttributesResponse(c *C) {
+func (s *CommandsGlobalSuite) TestDecodeReadAttributesResponse(c *C) {
 	res := &ReadAttributesResponse{}
 	bin.Decode([]byte{
 		127, 0, 0, byte(ZclDataTypeNoData), //NoData
@@ -40,7 +40,7 @@ func (s *ZclSuite) TestDecodeReadAttributesResponse(c *C) {
 	c.Assert(res, DeepEquals, expected)
 }
 
-func (s *ZclSuite) TestEncodeReadAttributesResponse(c *C) {
+func (s *CommandsGlobalSuite) TestEncodeReadAttributesResponse(c *C) {
 	a := &ReadAttributesResponse{
 		[]*ReadAttributeStatus{
 			&ReadAttributeStatus{127, ZclStatusSuccess, &Attribute{ZclDataTypeNoData, nil}},

@@ -1,14 +1,12 @@
-package zcl
+package cluster
 
 import (
 	"encoding/binary"
 	"io"
 	"strconv"
 
-	"github.com/dyrkin/bin"
 	"github.com/dyrkin/bin/util"
 	"github.com/dyrkin/composer"
-	. "github.com/dyrkin/zcl-go/frame"
 )
 
 type ReadAttributesCommand struct {
@@ -215,98 +213,6 @@ type ExtendedAttributeInformation struct {
 type DiscoverAttributesExtendedResponse struct {
 	DiscoveryComplete             uint8
 	ExtendedAttributeInformations []*ExtendedAttributeInformation
-}
-
-func ReadAttributesCommandFrame(command *ReadAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributes, command, direction, disableDefaultResponse)
-}
-
-func ReadAttributesResponseFrame(command *ReadAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributesResponse, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesCommandFrame(command *WriteAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributes, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesUndividedCommandFrame(command *WriteAttributesUndividedCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesUndivided, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesResponseFrame(command *WriteAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesResponse, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesNoResponseCommandFrame(command *WriteAttributesNoResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesNoResponse, command, direction, disableDefaultResponse)
-}
-
-func ConfigureReportingCommandFrame(command *ConfigureReportingCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReporting, command, direction, disableDefaultResponse)
-}
-
-func ConfigureReportingResponseFrame(command *ConfigureReportingResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandConfigureReportingResponse, command, direction, disableDefaultResponse)
-}
-
-func ReadReportingConfigurationCommandFrame(command *ReadReportingConfigurationCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfiguration, command, direction, disableDefaultResponse)
-}
-
-func ReadReportingConfigurationResponseFrame(command *ReadReportingConfigurationResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadReportingConfigurationResponse, command, direction, disableDefaultResponse)
-}
-
-func ReportAttributesCommandFrame(command *ReportAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReportAttributes, command, direction, disableDefaultResponse)
-}
-
-func DefaultResponseCommandFrame(command *DefaultResponseCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDefaultResponse, command, direction, disableDefaultResponse)
-}
-
-func DiscoverAttributesCommandFrame(command *DiscoverAttributesCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributes, command, direction, disableDefaultResponse)
-}
-
-func DiscoverAttributesResponseFrame(command *DiscoverAttributesResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesResponse, command, direction, disableDefaultResponse)
-}
-
-func ReadAttributesStructuredCommandFrame(command *ReadAttributesStructuredCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandReadAttributesStructured, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesStructuredCommandFrame(command *WriteAttributesStructuredCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesStructured, command, direction, disableDefaultResponse)
-}
-
-func WriteAttributesStructuredResponseFrame(command *WriteAttributesStructuredResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandWriteAttributesStructuredResponse, command, direction, disableDefaultResponse)
-}
-
-func DiscoverCommandsReceivedCommandFrame(command *DiscoverCommandsReceivedCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsReceived, command, direction, disableDefaultResponse)
-}
-
-func DiscoverCommandsReceivedResponseFrame(command *DiscoverCommandsReceivedResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsReceivedResponse, command, direction, disableDefaultResponse)
-}
-
-func DiscoverCommandsGeneratedCommandFrame(command *DiscoverCommandsGeneratedCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsGenerated, command, direction, disableDefaultResponse)
-}
-
-func DiscoverCommandsGeneratedResponseFrame(command *DiscoverCommandsGeneratedResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverCommandsGenerated, command, direction, disableDefaultResponse)
-}
-
-func DiscoverAttributesExtendedCommandFrame(command *DiscoverAttributesExtendedCommand, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesExtended, command, direction, disableDefaultResponse)
-}
-
-func DiscoverAttributesExtendedResponseFrame(command *DiscoverAttributesExtendedResponse, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationNonManufacturerSpecificFrame(ZclCommandDiscoverAttributesExtendedResponse, command, direction, disableDefaultResponse)
 }
 
 func (a *Attribute) Serialize(w io.Writer) {
@@ -643,85 +549,6 @@ func readAttribute(c *composer.Composer) (dataType ZclDataType, value interface{
 		value = key
 	case ZclDataTypeUnknown:
 
-	}
-	return
-}
-
-func ToFoundationNonManufacturerSpecificFrame(commandIdentifier ZclCommand, command interface{}, direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFoundationManufacturerSpecificFrame(uint8(commandIdentifier), command, false, 0, direction,
-		disableDefaultResponse)
-}
-
-func ToFoundationManufacturerSpecificFrame(commandIdentifier uint8, command interface{}, manufacturerSpecific bool, manufacturerCode uint16,
-	direction Direction, disableDefaultResponse bool) *Frame {
-	return ToFrame(commandIdentifier, command, FrameTypeGlobal, manufacturerSpecific, manufacturerCode, direction,
-		disableDefaultResponse)
-}
-
-func ToFrame(commandIdentifier uint8, command interface{}, frameType FrameType, manufacturerSpecific bool, manufacturerCode uint16,
-	direction Direction, disableDefaultResponse bool) *Frame {
-	return &Frame{
-		&FrameControl{frameType, flag(manufacturerSpecific), direction, flag(disableDefaultResponse), 0},
-		manufacturerCode, 1,
-		commandIdentifier,
-		bin.Encode(command),
-	}
-}
-
-func FromFrame(frame *Frame) (decoded interface{}, ok bool) {
-	ok = true
-	switch ZclCommand(frame.CommandIdentifier) {
-	case ZclCommandReadAttributes:
-		decoded = &ReadAttributesCommand{}
-	case ZclCommandReadAttributesResponse:
-		decoded = &ReadAttributesResponse{}
-	case ZclCommandWriteAttributes:
-		decoded = &WriteAttributesCommand{}
-	case ZclCommandWriteAttributesUndivided:
-		decoded = &WriteAttributesUndividedCommand{}
-	case ZclCommandWriteAttributesResponse:
-		decoded = &WriteAttributesResponse{}
-	case ZclCommandWriteAttributesNoResponse:
-		decoded = &WriteAttributesNoResponseCommand{}
-	case ZclCommandConfigureReporting:
-		decoded = &ConfigureReportingCommand{}
-	case ZclCommandConfigureReportingResponse:
-		decoded = &ConfigureReportingResponse{}
-	case ZclCommandReadReportingConfiguration:
-		decoded = &ReadReportingConfigurationCommand{}
-	case ZclCommandReadReportingConfigurationResponse:
-		decoded = &ReadReportingConfigurationResponse{}
-	case ZclCommandReportAttributes:
-		decoded = &ReportAttributesCommand{}
-	case ZclCommandDefaultResponse:
-		decoded = &DefaultResponseCommand{}
-	case ZclCommandDiscoverAttributes:
-		decoded = &DiscoverAttributesCommand{}
-	case ZclCommandDiscoverAttributesResponse:
-		decoded = &DiscoverAttributesResponse{}
-	case ZclCommandReadAttributesStructured:
-		decoded = &ReadAttributesStructuredCommand{}
-	case ZclCommandWriteAttributesStructured:
-		decoded = &WriteAttributesStructuredCommand{}
-	case ZclCommandWriteAttributesStructuredResponse:
-		decoded = &WriteAttributesStructuredResponse{}
-	case ZclCommandDiscoverCommandsReceived:
-		decoded = &DiscoverCommandsReceivedCommand{}
-	case ZclCommandDiscoverCommandsReceivedResponse:
-		decoded = &DiscoverCommandsReceivedResponse{}
-	case ZclCommandDiscoverCommandsGenerated:
-		decoded = &DiscoverCommandsGeneratedCommand{}
-	case ZclCommandDiscoverCommandsGeneratedResponse:
-		decoded = &DiscoverCommandsGeneratedResponse{}
-	case ZclCommandDiscoverAttributesExtended:
-		decoded = &DiscoverAttributesExtendedCommand{}
-	case ZclCommandDiscoverAttributesExtendedResponse:
-		decoded = &DiscoverAttributesExtendedResponse{}
-	default:
-		ok = false
-	}
-	if ok {
-		bin.Decode(frame.Payload, decoded)
 	}
 	return
 }
