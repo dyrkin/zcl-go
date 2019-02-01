@@ -27,13 +27,11 @@ func (c *Zcl) LocalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, a
 	return
 }
 
-func (c *Zcl) GlobalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, args ...interface{}) (f *frame.Frame, err error) {
-	if _, cluster, err := clusterQuery(c.clusters); err == nil {
-		if commandId, commandDescriptor, err := commandQuery(cluster); err == nil {
-			command := commandDescriptor.Command
-			preparedCommand := prepareCommand(command, args...)
-			return createFrame(frame.FrameTypeGlobal, commandId, preparedCommand), nil
-		}
+func (c *Zcl) GlobalFrame(commandExtractor CommandExtractor, args ...interface{}) (f *frame.Frame, err error) {
+	if commandId, commandDescriptor, err := commandExtractor(c.global); err == nil {
+		command := commandDescriptor.Command
+		preparedCommand := prepareCommand(command, args...)
+		return createFrame(frame.FrameTypeGlobal, commandId, preparedCommand), nil
 	}
 	return
 }
