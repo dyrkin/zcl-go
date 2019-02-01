@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dyrkin/bin"
+
 	"github.com/dyrkin/zcl-go/reflection"
 
 	"github.com/dyrkin/zcl-go/frame"
@@ -24,6 +25,36 @@ func (c *Zcl) LocalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, a
 		}
 	}
 	return
+}
+
+func (c *Zcl) FromFrame(clusterId ClusterId, f *frame.Frame) (interface{}, error) {
+	var cd *commandDescriptor
+	var ok bool
+	switch f.FrameControl.FrameType {
+	case frame.FrameTypeGlobal:
+		if cd, ok = c.global[f.CommandIdentifier]; !ok {
+			return nil, fmt.Errorf("Unsupported global command identifier %d", f.CommandIdentifier)
+		}
+	case frame.FrameTypeLocal:
+		var cluster *cluster
+		if cluster, ok = c.clusters.all[clusterId]; !ok {
+			return nil, fmt.Errorf("Unknown cluster %d", clusterId)
+		}
+		var commandDescriptors map[uint8]*commandDescriptor
+		switch f.FrameControl.Direction {
+		case frame.DirectionClientServer:
+			commandDescriptors = cluster.CommandDescriptors.Received
+		case frame.DirectionServerClient:
+			commandDescriptors = cluster.CommandDescriptors.Generated
+		}
+		if cd, ok = commandDescriptors[f.CommandIdentifier]; !ok {
+			return nil, fmt.Errorf("Cluster %d doesn't support this command %d", clusterId, f.CommandIdentifier)
+		}
+	}
+	command := cd.Command
+	copy := reflection.Copy(command)
+	bin.Decode(f.Payload, copy)
+	return copy, nil
 }
 
 func ClusterByID(clusterId ClusterId) ClusterQuery {
