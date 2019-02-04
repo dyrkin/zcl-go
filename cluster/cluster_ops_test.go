@@ -13,16 +13,16 @@ type ClusterOpsSuite struct{}
 var _ = Suite(&ClusterOpsSuite{})
 
 func (s *ClusterOpsSuite) TestClusterByName(c *C) {
-	zcl := New()
-	clusterId, cluster, err := ClusterByName("Basic")(zcl.clusters)
+	lib := New()
+	clusterId, cluster, err := ClusterByName("Basic")(lib.Clusters)
 	c.Assert(err, IsNil)
 	c.Assert(clusterId, Equals, Basic)
 	c.Assert(cluster, NotNil)
 }
 
 func (s *ClusterOpsSuite) TestCommandByName(c *C) {
-	zcl := New()
-	_, cluster, err := ClusterByID(Basic)(zcl.clusters)
+	lib := New()
+	_, cluster, err := ClusterByID(Basic)(lib.Clusters)
 	c.Assert(err, IsNil)
 	commandId, command, err := CommandByName("ResetToFactoryDefaults")(cluster.CommandDescriptors.Received)
 	c.Assert(err, IsNil)
@@ -32,8 +32,7 @@ func (s *ClusterOpsSuite) TestCommandByName(c *C) {
 }
 
 func (s *ClusterOpsSuite) TestLocalFrame(c *C) {
-	zcl := New()
-	frame, err := zcl.LocalFrame(ClusterByID(Identify), ReceiveCommand(CommandByName("Identify")), uint16(16))
+	frame, err := Library.LocalFrame(ClusterByID(Identify), ReceiveCommand(CommandByName("Identify")), uint16(16))
 	c.Assert(err, IsNil)
 	c.Assert(frame.Payload, DeepEquals, []uint8{16, 0})
 }
