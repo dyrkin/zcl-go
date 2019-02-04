@@ -33,9 +33,10 @@ type Attribute struct {
 }
 
 type ReadAttributeStatus struct {
-	AttributeID uint16
-	Status      ZclStatus
-	Attribute   *Attribute `cond:"uint:Status==0"`
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Status        ZclStatus
+	Attribute     *Attribute `cond:"uint:Status==0"`
 }
 
 type ReadAttributesResponse struct {
@@ -43,8 +44,9 @@ type ReadAttributesResponse struct {
 }
 
 type WriteAttributeRecord struct {
-	AttributeID uint16
-	Attribute   *Attribute
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Attribute     *Attribute
 }
 
 type WriteAttributesCommand struct {
@@ -60,8 +62,9 @@ type WriteAttributesNoResponseCommand struct {
 }
 
 type WriteAttributeStatus struct {
-	Status      ZclStatus
-	AttributeID uint16
+	Status        ZclStatus
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
 }
 
 type WriteAttributesResponse struct {
@@ -70,6 +73,7 @@ type WriteAttributesResponse struct {
 
 type AttributeReportingConfigurationRecord struct {
 	Direction                ReportDirection
+	AttributeName            string `transient:"true"`
 	AttributeID              uint16
 	AttributeDataType        ZclDataType `cond:"uint:Direction==0"`
 	MinimumReportingInterval uint16      `cond:"uint:Direction==0"`
@@ -83,9 +87,10 @@ type ConfigureReportingCommand struct {
 }
 
 type AttributeStatusRecord struct {
-	Status      ZclStatus
-	Direction   ReportDirection
-	AttributeID uint16
+	Status        ZclStatus
+	Direction     ReportDirection
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
 }
 
 type ConfigureReportingResponse struct {
@@ -93,8 +98,9 @@ type ConfigureReportingResponse struct {
 }
 
 type AttributeRecord struct {
-	Direction   ReportDirection
-	AttributeID uint16
+	Direction     ReportDirection
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
 }
 
 type ReadReportingConfigurationCommand struct {
@@ -104,6 +110,7 @@ type ReadReportingConfigurationCommand struct {
 type AttributeReportingConfigurationResponseRecord struct {
 	Status                   ZclStatus
 	Direction                ReportDirection
+	AttributeName            string `transient:"true"`
 	AttributeID              uint16
 	AttributeDataType        ZclDataType `cond:"uint:Direction==0;uint:Status==0"`
 	MinimumReportingInterval uint16      `cond:"uint:Direction==0;uint:Status==0"`
@@ -116,8 +123,9 @@ type ReadReportingConfigurationResponse struct {
 	AttributeReportingConfigurationResponseRecords []*AttributeReportingConfigurationResponseRecord
 }
 type AttributeReport struct {
-	AttributeID uint16
-	Attribute   *Attribute
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Attribute     *Attribute
 }
 
 type ReportAttributesCommand struct {
@@ -135,6 +143,7 @@ type DiscoverAttributesCommand struct {
 }
 
 type AttributeInformation struct {
+	AttributeName     string `transient:"true"`
 	AttributeID       uint16
 	AttributeDataType ZclDataType
 }
@@ -145,8 +154,9 @@ type DiscoverAttributesResponse struct {
 }
 
 type AttributeSelector struct {
-	AttributeID uint16
-	Selector    []uint16 `size:"1"`
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Selector      []uint16 `size:"1"`
 }
 
 type ReadAttributesStructuredCommand struct {
@@ -154,9 +164,10 @@ type ReadAttributesStructuredCommand struct {
 }
 
 type WriteAttributeStructuredRecord struct {
-	AttributeID uint16
-	Selector    []uint16 `size:"1"`
-	Attribute   *Attribute
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Selector      []uint16 `size:"1"`
+	Attribute     *Attribute
 }
 
 type WriteAttributesStructuredCommand struct {
@@ -164,9 +175,10 @@ type WriteAttributesStructuredCommand struct {
 }
 
 type WriteAttributeStatusRecord struct {
-	Status      ZclStatus
-	AttributeID uint16
-	Selector    []uint16 `size:"1"`
+	Status        ZclStatus
+	AttributeName string `transient:"true"`
+	AttributeID   uint16
+	Selector      []uint16 `size:"1"`
 }
 
 type WriteAttributesStructuredResponse struct {
@@ -205,6 +217,7 @@ type AttributeAccessControl struct {
 }
 
 type ExtendedAttributeInformation struct {
+	AttributeName          string `transient:"true"`
 	AttributeID            uint16
 	AttributeDataType      ZclDataType
 	AttributeAccessControl *AttributeAccessControl

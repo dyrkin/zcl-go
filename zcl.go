@@ -111,6 +111,11 @@ func (z *Zcl) toZclCommand(clusterId uint16, f *frame.Frame) (interface{}, strin
 		if cd, ok = z.library.Global()[f.CommandIdentifier]; !ok {
 			return nil, "", fmt.Errorf("Unsupported global command identifier %d", f.CommandIdentifier)
 		}
+		command := cd.Command
+		copy := reflection.Copy(command)
+		bin.Decode(f.Payload, copy)
+		z.patchName(copy, clusterId, f.CommandIdentifier)
+		return copy, cd.Name, nil
 	case frame.FrameTypeLocal:
 		var c *cluster.Cluster
 		if c, ok = z.library.Clusters()[cluster.ClusterId(clusterId)]; !ok {
@@ -126,11 +131,86 @@ func (z *Zcl) toZclCommand(clusterId uint16, f *frame.Frame) (interface{}, strin
 		if cd, ok = commandDescriptors[f.CommandIdentifier]; !ok {
 			return nil, "", fmt.Errorf("Cluster %d doesn't support this command %d", clusterId, f.CommandIdentifier)
 		}
+		command := cd.Command
+		copy := reflection.Copy(command)
+		bin.Decode(f.Payload, copy)
+		return copy, cd.Name, nil
 	}
-	command := cd.Command
-	copy := reflection.Copy(command)
-	bin.Decode(f.Payload, copy)
-	return copy, cd.Name, nil
+	return nil, "", fmt.Errorf("Unknown frame type")
+}
+
+func (z *Zcl) patchName(command interface{}, clusterId uint16, commandId uint8) {
+	switch cmd := command.(type) {
+	case *cluster.ReadAttributesResponse:
+		for _, v := range cmd.ReadAttributeStatuses {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesCommand:
+		for _, v := range cmd.WriteAttributeRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesUndividedCommand:
+		for _, v := range cmd.WriteAttributeRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesNoResponseCommand:
+		for _, v := range cmd.WriteAttributeRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesResponse:
+		for _, v := range cmd.WriteAttributeStatuses {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ConfigureReportingCommand:
+		for _, v := range cmd.AttributeReportingConfigurationRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ConfigureReportingResponse:
+		for _, v := range cmd.AttributeStatusRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ReadReportingConfigurationCommand:
+		for _, v := range cmd.AttributeRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ReadReportingConfigurationResponse:
+		for _, v := range cmd.AttributeReportingConfigurationResponseRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ReportAttributesCommand:
+		for _, v := range cmd.AttributeReports {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.DiscoverAttributesResponse:
+		for _, v := range cmd.AttributeInformations {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.ReadAttributesStructuredCommand:
+		for _, v := range cmd.AttributeSelectors {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesStructuredCommand:
+		for _, v := range cmd.WriteAttributeStructuredRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.WriteAttributesStructuredResponse:
+		for _, v := range cmd.WriteAttributeStatusRecords {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	case *cluster.DiscoverAttributesExtendedResponse:
+		for _, v := range cmd.ExtendedAttributeInformations {
+			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
+		}
+	}
+}
+
+func (z *Zcl) getAttributeName(clusterId uint16, attributeId uint16) string {
+	if cluster, ok := z.library.Clusters()[cluster.ClusterId(clusterId)]; ok {
+		if attributeDescriptor, ok := cluster.AttributeDescriptors[attributeId]; ok {
+			return attributeDescriptor.Name
+		}
+	}
+	return ""
 }
 
 func (z *Zcl) toZclFrameControl(frameControl *frame.FrameControl) *ZclFrameControl {
