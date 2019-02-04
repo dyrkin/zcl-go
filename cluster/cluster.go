@@ -42,6 +42,7 @@ const (
 	PowerConfiguration             ClusterId = 0x0001
 	DeviceTemperatureConfiguration ClusterId = 0x0002
 	Identify                       ClusterId = 0x0003
+	LevelControl                   ClusterId = 0x0008
 	MultistateInput                ClusterId = 0x0012
 )
 
@@ -147,11 +148,35 @@ func New() *ClusterLibrary {
 				CommandDescriptors: &CommandDescriptors{
 					Received: map[uint8]*CommandDescriptor{
 						0x00: &CommandDescriptor{"Identify", &IdentifyCommand{}},
-						0x01: &CommandDescriptor{"IdentifyQuery", &IdentifyQuery{}},
-						0x40: &CommandDescriptor{"TriggerEffect ", &TriggerEffect{}},
+						0x01: &CommandDescriptor{"IdentifyQuery", &IdentifyQueryCommand{}},
+						0x40: &CommandDescriptor{"TriggerEffect ", &TriggerEffectCommand{}},
 					},
 					Generated: map[uint8]*CommandDescriptor{
-						0x00: &CommandDescriptor{"IdentifyQueryResponse ", &IdentifyQueryResponseCommand{}},
+						0x00: &CommandDescriptor{"IdentifyQueryResponse ", &IdentifyQueryResponse{}},
+					},
+				},
+			},
+			LevelControl: &Cluster{
+				Name: "LevelControl",
+				AttributeDescriptors: map[uint16]*AttributeDescriptor{
+					0x0000: &AttributeDescriptor{"CurrentLevel", ZclDataTypeUint8, Read | Reportable},
+					0x0001: &AttributeDescriptor{"RemainingTime", ZclDataTypeUint16, Read},
+					0x0010: &AttributeDescriptor{"OnOffTransitionTime", ZclDataTypeUint16, Read | Write},
+					0x0011: &AttributeDescriptor{"OnLevel", ZclDataTypeUint8, Read | Write},
+					0x0012: &AttributeDescriptor{"OnTransitionTime", ZclDataTypeUint16, Read | Write},
+					0x0013: &AttributeDescriptor{"OffTransitionTime", ZclDataTypeUint16, Read | Write},
+					0x0014: &AttributeDescriptor{"DefaultMoveRate", ZclDataTypeUint16, Read | Write},
+				},
+				CommandDescriptors: &CommandDescriptors{
+					Received: map[uint8]*CommandDescriptor{
+						0x00: &CommandDescriptor{"MoveToLevel ", &MoveToLevelCommand{}},
+						0x01: &CommandDescriptor{"Move", &MoveCommand{}},
+						0x02: &CommandDescriptor{"Step ", &StepCommand{}},
+						0x03: &CommandDescriptor{"Stop ", &StopCommand{}},
+						0x04: &CommandDescriptor{"MoveToLevel/OnOff", &MoveToLevelOnOffCommand{}},
+						0x05: &CommandDescriptor{"Move/OnOff", &MoveOnOffCommand{}},
+						0x06: &CommandDescriptor{"Step/OnOff", &StepOnOffCommand{}},
+						0x07: &CommandDescriptor{"Stop/OnOff", &StopOnOffCommand{}},
 					},
 				},
 			},
