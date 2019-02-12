@@ -26,14 +26,14 @@ func (s *CommandsGlobalSuite) TestDecodeReadAttributesResponse(c *C) {
 	}, res)
 	expected := &ReadAttributesResponse{
 		[]*ReadAttributeStatus{
-			&ReadAttributeStatus{127, ZclStatusSuccess, &Attribute{ZclDataTypeNoData, nil}},
-			&ReadAttributeStatus{128, ZclStatusFailure, nil},
-			&ReadAttributeStatus{129, ZclStatusSuccess, &Attribute{ZclDataTypeData24, [3]byte{0x12, 0x13, 0x14}}},
-			&ReadAttributeStatus{130, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap24, uint64(0x12)}},
-			&ReadAttributeStatus{131, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap32, uint64(0x12)}},
-			&ReadAttributeStatus{132, ZclStatusSuccess, &Attribute{ZclDataTypeInt24, int64(-9)}},
-			&ReadAttributeStatus{133, ZclStatusSuccess, &Attribute{ZclDataTypeArray,
-				[]*Attribute{&Attribute{ZclDataTypeInt24, int64(-8)}, &Attribute{ZclDataTypeInt24, int64(-9)}}},
+			{"", 127, ZclStatusSuccess, &Attribute{ZclDataTypeNoData, nil}},
+			{"", 128, ZclStatusFailure, nil},
+			{"", 129, ZclStatusSuccess, &Attribute{ZclDataTypeData24, [3]byte{0x12, 0x13, 0x14}}},
+			{"", 130, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap24, uint64(0x12)}},
+			{"", 131, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap32, uint64(0x12)}},
+			{"", 132, ZclStatusSuccess, &Attribute{ZclDataTypeInt24, int64(-9)}},
+			{"", 133, ZclStatusSuccess, &Attribute{ZclDataTypeArray,
+				[]*Attribute{{ZclDataTypeInt24, int64(-8)}, {ZclDataTypeInt24, int64(-9)}}},
 			},
 		},
 	}
@@ -43,14 +43,14 @@ func (s *CommandsGlobalSuite) TestDecodeReadAttributesResponse(c *C) {
 func (s *CommandsGlobalSuite) TestEncodeReadAttributesResponse(c *C) {
 	a := &ReadAttributesResponse{
 		[]*ReadAttributeStatus{
-			&ReadAttributeStatus{127, ZclStatusSuccess, &Attribute{ZclDataTypeNoData, nil}},
-			&ReadAttributeStatus{128, ZclStatusFailure, nil},
-			&ReadAttributeStatus{129, ZclStatusSuccess, &Attribute{ZclDataTypeData24, [3]byte{0x12, 0x13, 0x14}}},
-			&ReadAttributeStatus{130, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap24, uint64(0x12)}},
-			&ReadAttributeStatus{131, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap32, uint64(0x12)}},
-			&ReadAttributeStatus{132, ZclStatusSuccess, &Attribute{ZclDataTypeInt24, int64(-9)}},
-			&ReadAttributeStatus{133, ZclStatusSuccess, &Attribute{ZclDataTypeArray,
-				[]*Attribute{&Attribute{ZclDataTypeInt24, int64(-8)}, &Attribute{ZclDataTypeInt24, int64(-9)}}},
+			{"", 127, ZclStatusSuccess, &Attribute{ZclDataTypeNoData, nil}},
+			{"", 128, ZclStatusFailure, nil},
+			{"", 129, ZclStatusSuccess, &Attribute{ZclDataTypeData24, [3]byte{0x12, 0x13, 0x14}}},
+			{"", 130, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap24, uint64(0x12)}},
+			{"", 131, ZclStatusSuccess, &Attribute{ZclDataTypeBitmap32, uint64(0x12)}},
+			{"", 132, ZclStatusSuccess, &Attribute{ZclDataTypeInt24, int64(-9)}},
+			{"", 133, ZclStatusSuccess, &Attribute{ZclDataTypeArray,
+				[]*Attribute{{ZclDataTypeInt24, int64(-8)}, {ZclDataTypeInt24, int64(-9)}}},
 			},
 		},
 	}

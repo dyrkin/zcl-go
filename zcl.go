@@ -1,13 +1,12 @@
-package cluster
+package zcl
 
 import (
 	"fmt"
-
 	"github.com/dyrkin/bin"
 	"github.com/dyrkin/zcl-go/cluster"
 	"github.com/dyrkin/zcl-go/frame"
 	"github.com/dyrkin/zcl-go/reflection"
-	znp "github.com/dyrkin/znp-go"
+	"github.com/dyrkin/znp-go"
 )
 
 type CommandExtractor func(commandDescriptors map[uint8]*cluster.CommandDescriptor) (uint8, *cluster.CommandDescriptor, error)
@@ -32,14 +31,6 @@ type ZclFrame struct {
 	Command                   interface{}
 }
 
-type ZclOutgoingOptions struct {
-	WildcardProfileID uint8
-	APSAck            bool
-	DiscoverRoute     bool
-	APSSecurity       bool
-	SkipRouting       bool
-}
-
 type ZclIncomingMessage struct {
 	GroupID              uint16
 	ClusterID            uint16
@@ -51,17 +42,6 @@ type ZclIncomingMessage struct {
 	SecurityUse          bool
 	Timestamp            uint32
 	TransactionSeqNumber uint8
-	Data                 *ZclFrame
-}
-
-type ZclOutgoingMessage struct {
-	DstAddr              string
-	DstEndpoint          uint8
-	SrcEndpoint          uint8
-	ClusterID            uint16
-	TransactionSeqNumber uint8
-	Options              *ZclOutgoingOptions
-	Radius               uint8
 	Data                 *ZclFrame
 }
 
@@ -97,9 +77,9 @@ func (z *Zcl) toZclFrame(data []uint8, clusterId uint16) (*ZclFrame, error) {
 	f.ManufacturerCode = frame.ManufacturerCode
 	f.TransactionSequenceNumber = frame.TransactionSequenceNumber
 	f.CommandIdentifier = frame.CommandIdentifier
-	command, name, err := z.toZclCommand(clusterId, frame)
+	cmd, name, err := z.toZclCommand(clusterId, frame)
 	f.CommandName = name
-	f.Command = command
+	f.Command = cmd
 	return f, err
 }
 
@@ -109,17 +89,17 @@ func (z *Zcl) toZclCommand(clusterId uint16, f *frame.Frame) (interface{}, strin
 	switch f.FrameControl.FrameType {
 	case frame.FrameTypeGlobal:
 		if cd, ok = z.library.Global()[f.CommandIdentifier]; !ok {
-			return nil, "", fmt.Errorf("Unsupported global command identifier %d", f.CommandIdentifier)
+			return nil, "", fmt.Errorf("unsupported global cmd identifier %d", f.CommandIdentifier)
 		}
-		command := cd.Command
-		copy := reflection.Copy(command)
+		cmd := cd.Command
+		copy := reflection.Copy(cmd)
 		bin.Decode(f.Payload, copy)
 		z.patchName(copy, clusterId, f.CommandIdentifier)
 		return copy, cd.Name, nil
 	case frame.FrameTypeLocal:
 		var c *cluster.Cluster
 		if c, ok = z.library.Clusters()[cluster.ClusterId(clusterId)]; !ok {
-			return nil, "", fmt.Errorf("Unknown cluster %d", clusterId)
+			return nil, "", fmt.Errorf("unknown cluster %d", clusterId)
 		}
 		var commandDescriptors map[uint8]*cluster.CommandDescriptor
 		switch f.FrameControl.Direction {
@@ -129,18 +109,18 @@ func (z *Zcl) toZclCommand(clusterId uint16, f *frame.Frame) (interface{}, strin
 			commandDescriptors = c.CommandDescriptors.Generated
 		}
 		if cd, ok = commandDescriptors[f.CommandIdentifier]; !ok {
-			return nil, "", fmt.Errorf("Cluster %d doesn't support this command %d", clusterId, f.CommandIdentifier)
+			return nil, "", fmt.Errorf("cluster %d doesn't support this cmd %d", clusterId, f.CommandIdentifier)
 		}
-		command := cd.Command
-		copy := reflection.Copy(command)
+		cmd := cd.Command
+		copy := reflection.Copy(cmd)
 		bin.Decode(f.Payload, copy)
 		return copy, cd.Name, nil
 	}
-	return nil, "", fmt.Errorf("Unknown frame type")
+	return nil, "", fmt.Errorf("unknown frame type")
 }
 
-func (z *Zcl) patchName(command interface{}, clusterId uint16, commandId uint8) {
-	switch cmd := command.(type) {
+func (z *Zcl) patchName(cmd interface{}, clusterId uint16, commandId uint8) {
+	switch cmd := cmd.(type) {
 	case *cluster.ReadAttributesResponse:
 		for _, v := range cmd.ReadAttributeStatuses {
 			v.AttributeName = z.getAttributeName(clusterId, v.AttributeID)
@@ -222,105 +202,6 @@ func (z *Zcl) toZclFrameControl(frameControl *frame.FrameControl) *ZclFrameContr
 	return fc
 }
 
-func (z *Zcl) LocalFrame(clusterQuery ClusterQuery, commandQuery CommandQuery, args ...interface{}) (f *frame.Frame, err error) {
-	if _, cluster, err := clusterQuery(z.library.Clusters()); err == nil {
-		if commandId, commandDescriptor, err := commandQuery(cluster); err == nil {
-			command := commandDescriptor.Command
-			preparedCommand := prepareCommand(command, args...)
-			return createFrame(frame.FrameTypeLocal, commandId, preparedCommand), nil
-		}
-	}
-	return
-}
-
-func (z *Zcl) GlobalFrame(commandExtractor CommandExtractor, args ...interface{}) (f *frame.Frame, err error) {
-	if commandId, commandDescriptor, err := commandExtractor(z.library.Global()); err == nil {
-		command := commandDescriptor.Command
-		preparedCommand := prepareCommand(command, args...)
-		return createFrame(frame.FrameTypeGlobal, commandId, preparedCommand), nil
-	}
-	return
-}
-
-func ClusterByID(clusterId cluster.ClusterId) ClusterQuery {
-	return func(c map[cluster.ClusterId]*cluster.Cluster) (cluster.ClusterId, *cluster.Cluster, error) {
-		if cluster, ok := c[clusterId]; ok {
-			return clusterId, cluster, nil
-		}
-		return 0, nil, fmt.Errorf("Unknown cluster %d", clusterId)
-	}
-}
-
-func ClusterByName(clusterName string) ClusterQuery {
-	return func(c map[cluster.ClusterId]*cluster.Cluster) (cluster.ClusterId, *cluster.Cluster, error) {
-		for k, v := range c {
-			if v.Name == clusterName {
-				return k, v, nil
-			}
-		}
-		return 0, nil, fmt.Errorf("Unknown cluster %q", clusterName)
-	}
-}
-
-func ReceiveCommand(commandExtractor CommandExtractor) CommandQuery {
-	return func(c *cluster.Cluster) (uint8, *cluster.CommandDescriptor, error) {
-		return commandExtractor(c.CommandDescriptors.Received)
-	}
-}
-
-func GeneratedCommand(commandExtractor CommandExtractor) CommandQuery {
-	return func(c *cluster.Cluster) (uint8, *cluster.CommandDescriptor, error) {
-		return commandExtractor(c.CommandDescriptors.Generated)
-	}
-}
-
-func CommandByName(commandName string) CommandExtractor {
-	return func(commandDescriptors map[uint8]*cluster.CommandDescriptor) (uint8, *cluster.CommandDescriptor, error) {
-		for commandId, command := range commandDescriptors {
-			if command.Name == commandName {
-				return commandId, command, nil
-			}
-		}
-		return 0, nil, fmt.Errorf("Unknown command %q", commandName)
-	}
-}
-
-func CommandById(commandId uint8) CommandExtractor {
-	return func(commandDescriptors map[uint8]*cluster.CommandDescriptor) (uint8, *cluster.CommandDescriptor, error) {
-		if command, ok := commandDescriptors[commandId]; ok {
-			return commandId, command, nil
-		}
-		return 0, nil, fmt.Errorf("Unknown command %d", commandId)
-	}
-}
-
-func prepareCommand(command interface{}, args ...interface{}) interface{} {
-	copy := reflection.Copy(command)
-	reflection.ApplyArgs(copy, args...)
-	return copy
-}
-
-func createFrame(frameType frame.FrameType, commandId uint8, command interface{}) *frame.Frame {
-	payload := make([]uint8, 0, 0)
-	if command != nil {
-		payload = bin.Encode(command)
-	}
-	return &frame.Frame{
-		FrameControl:              &frame.FrameControl{frameType, 0, frame.DirectionClientServer, 0, 0},
-		ManufacturerCode:          0,
-		TransactionSequenceNumber: 1,
-		CommandIdentifier:         commandId,
-		Payload:                   payload,
-	}
-}
-
 func (z *Zcl) ClusterLibrary() *cluster.ClusterLibrary {
 	return z.library
-}
-
-func flag(boolean bool) uint8 {
-	if boolean {
-		return 1
-	}
-	return 0
 }
