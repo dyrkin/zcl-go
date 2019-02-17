@@ -33,6 +33,7 @@ const (
 	Read       Access = 0x01
 	Write      Access = 0x02
 	Reportable Access = 0x04
+	Scene      Access = 0x08
 )
 
 type ClusterId uint16
@@ -42,6 +43,7 @@ const (
 	PowerConfiguration             ClusterId = 0x0001
 	DeviceTemperatureConfiguration ClusterId = 0x0002
 	Identify                       ClusterId = 0x0003
+	OnOff                          ClusterId = 0x0006
 	LevelControl                   ClusterId = 0x0008
 	MultistateInput                ClusterId = 0x0012
 	OTA                            ClusterId = 0x0019
@@ -154,6 +156,25 @@ func New() *ClusterLibrary {
 					},
 					Generated: map[uint8]*CommandDescriptor{
 						0x00: {"IdentifyQueryResponse ", &IdentifyQueryResponse{}},
+					},
+				},
+			},
+			OnOff: {
+				Name: "OnOff",
+				AttributeDescriptors: map[uint16]*AttributeDescriptor{
+					0x0000: {"OnOff", ZclDataTypeBoolean, Read | Reportable | Scene},
+					0x4000: {"GlobalSceneControl", ZclDataTypeBoolean, Read},
+					0x4001: {"OnTime", ZclDataTypeUint16, Read | Write},
+					0x4002: {"OffWaitTime", ZclDataTypeUint16, Read | Write},
+				},
+				CommandDescriptors: &CommandDescriptors{
+					Received: map[uint8]*CommandDescriptor{
+						0x00: {"Off", &OffCommand{}},
+						0x01: {"On", &OnCommand{}},
+						0x02: {"Toggle ", &ToggleCommand{}},
+						0x40: {"OffWithEffect ", &OffWithEffectCommand{}},
+						0x41: {"OnWithRecallGlobalScene ", &OnWithRecallGlobalSceneCommand{}},
+						0x42: {"OnWithTimedOff ", &OnWithTimedOffCommand{}},
 					},
 				},
 			},

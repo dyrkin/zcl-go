@@ -18,6 +18,25 @@ type IdentifyQueryResponse struct {
 	Timeout uint16
 }
 
+type OffCommand struct{}
+
+type OnCommand struct{}
+
+type ToggleCommand struct{}
+
+type OffWithEffectCommand struct {
+	EffectIdentifier uint8
+	EffectVariant    uint8
+}
+
+type OnWithRecallGlobalSceneCommand struct{}
+
+type OnWithTimedOffCommand struct {
+	OnOffControl uint8
+	OnTime       uint16
+	OffWaitTime  uint16
+}
+
 type MoveToLevelCommand struct {
 	Level          uint8
 	TransitionTime uint16
